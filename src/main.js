@@ -7,9 +7,9 @@ import renderer from './rendering';
 
 const update = renderer();
 const initialState = Immutable.fromJS({
-    position: 0,
-    direction: 1,
-    speed: 0.001,
+    position: Math.PI * 0.5,
+    direction: -1,
+    speed: 1.25 / 1000,
 });
 
 const clock = Rx.Observable
