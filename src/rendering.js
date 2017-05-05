@@ -28,7 +28,10 @@ function shipFactory() {
     const line = new THREE.Line(geometry, material);
     line.scale.multiplyScalar(3);
 
-    return line;
+    const container = new THREE.Object3D();
+    container.add(line);
+
+    return container;
 }
 
 function setup() {
@@ -54,14 +57,12 @@ function setup() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     }, false);
 
-    return ({ clock, state }) => {
-        window.requestAnimationFrame(() => {
-            ship.scale.x = state.get('direction') * 3;
-            ship.rotation.z = state.get('position') + (Math.PI / 2);
-            ship.position.x = Math.cos(state.get('position')) * 50;
-            ship.position.y = Math.sin(state.get('position')) * 50;
-            renderer.render(scene, camera);
-        });
+    return ({ state }) => {
+        ship.scale.x = state.get('direction');
+        ship.rotation.z = state.get('position') + (Math.PI / 2);
+        ship.position.x = Math.cos(state.get('position')) * 50;
+        ship.position.y = Math.sin(state.get('position')) * 50;
+        renderer.render(scene, camera);
     };
 }
 

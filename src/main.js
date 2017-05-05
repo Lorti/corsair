@@ -9,6 +9,7 @@ const update = renderer();
 const initialState = Immutable.fromJS({
     position: 0,
     direction: 1,
+    speed: 0.001,
 });
 
 const clock = Rx.Observable
@@ -33,7 +34,7 @@ const input = Rx.Observable
 
 const player = clock
     .map(clock => state => state.set('position',
-        (state.get('position') + (clock.delta * state.get('direction') * 0.001)) % (2 * Math.PI),
+        (state.get('position') + (clock.delta * state.get('direction') * state.get('speed'))) % (2 * Math.PI),
     ));
 
 const state = Rx.Observable
