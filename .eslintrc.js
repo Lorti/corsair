@@ -3,6 +3,7 @@ module.exports = {
     'rules': {
         'indent': ['error', 4],
         'max-len': ['warn', 120],
+        'no-mixed-operators': 'off',
         'no-plusplus': 'off',
         'no-shadow': 'off',
     },

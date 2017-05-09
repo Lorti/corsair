@@ -3,7 +3,8 @@
 
 import Rx from 'rxjs/Rx';
 import Immutable from 'immutable';
-import clock from './clock.js';
+import clock from './clock';
+import input from './input';
 import renderer from './rendering';
 
 const update = renderer();
@@ -21,26 +22,25 @@ function coinFactory() {
 }
 
 const initialState = Immutable.fromJS({
-    position: Math.PI * 0.5,
-    direction: -1,
+    player: {
+        position: Math.PI * 0.5,
+        direction: -1,
+    },
     speed: 1.25 / 1000,
     coins: coinFactory(),
 });
 
-
-const input = Rx.Observable
-    .fromEvent(document, 'keypress')
-    .map(event => (state) => {
-        if (event.keyCode === 32) {
-            return state.set('direction', state.get('direction') * (-1));
-        }
-        return state;
+const player = clock.withLatestFrom(input)
+    .map(([clock, input]) => (state) => {
+        const position = state.getIn(['player', 'position']) + clock.get('delta') * input.get('direction') * state.get('speed');
+        const normalized = (position + 2 * Math.PI) % (2 * Math.PI);
+        return state.merge({
+            player: {
+                position: normalized,
+                direction: input.get('direction'),
+            },
+        });
     });
-
-const player = clock
-    .map(clock => state => state.set('position',
-        (state.get('position') + (clock.get('delta') * state.get('direction') * state.get('speed')) + 2 * Math.PI) % (2 * Math.PI), // TODO
-    ));
 
 const updateCoins = state => state.update('coins', coins => coins.map((coin) => { // TODO
     const pCoin = coin.get('angle');
@@ -56,15 +56,8 @@ const updateCoins = state => state.update('coins', coins => coins.map((coin) => 
 }));
 
 const state = Rx.Observable
-    .merge(input, player)
-    .scan((state, reducer) => updateCoins(reducer(state)), initialState);
+    .merge(player)
+    .scan((state, reducer) => reducer(state), initialState);
 
-state.subscribe(state => {
-    update(state);
-});
-
-//const loop = clock.withLatestFrom(state, (clock, state) => ({ clock, state }));
-//
-//state.subscribe(({ clock, state }) => {
-//    update({ clock, state });
-//});
+const loop = clock.withLatestFrom(state, (clock, state) => state);
+loop.subscribe(state => update(state));

@@ -107,9 +107,9 @@ function setup() {
         for (let i = 0; i < state.get('coins').size; i++) {
             coins.children[i].visible = !state.getIn(['coins', i, 'collected']);
         }
-        ship.scale.y = state.get('direction'); // TODO
-        ship.rotation.z = state.get('position') + (Math.PI * 2);
-        const position = polarToCartesian(state.get('position'), RADIUS);
+        ship.scale.y = state.getIn(['player', 'direction']); // TODO
+        ship.rotation.z = state.getIn(['player', 'position']) + (Math.PI * 2);
+        const position = polarToCartesian(state.getIn(['player', 'position']), RADIUS);
         ship.position.x = position.x;
         ship.position.y = position.y;
         renderer.render(scene, camera);
