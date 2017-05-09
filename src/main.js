@@ -15,6 +15,7 @@ function coinFactory() {
         coins.push({
             angle: ((2 * Math.PI) / 24) * i,
             radius: 1,
+            collision: false,
             collected: false,
         });
     }
@@ -43,21 +44,22 @@ const player = clock.withLatestFrom(input)
     });
 
 const updateCoins = state => state.update('coins', coins => coins.map((coin) => { // TODO
-    const pCoin = coin.get('angle');
-    const rCoin = ((2 * Math.PI) / 360) * coin.get('radius'); // TODO
-    const pPlayer = state.get('position');
-    const pRadius = ((2 * Math.PI) / 360) * 6; // TODO
-//    console.log(pPlayer);
-    if (Math.abs(pPlayer - pCoin) <= rCoin + pRadius) {
+    if (coin.get('collision', false)) {
         return coin.set('collected', true);
     }
-//    debugger;
+    const coinPosition = coin.get('angle');
+    const coinRadius = ((2 * Math.PI) / 360) * coin.get('radius'); // TODO
+    const playerPosition = state.getIn(['player', 'position']);
+    const playerRadius = ((2 * Math.PI) / 360) * 6; // TODO
+    if (Math.abs(playerPosition - coinPosition) <= coinRadius + playerRadius) {
+        return coin.set('collision', true);
+    }
     return coin;
 }));
 
 const state = Rx.Observable
     .merge(player)
-    .scan((state, reducer) => reducer(state), initialState);
+    .scan((state, reducer) => updateCoins(reducer(state)), initialState);
 
 const loop = clock.withLatestFrom(state, (clock, state) => state);
 loop.subscribe(state => update(state));

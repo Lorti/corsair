@@ -7,12 +7,13 @@ const state = Immutable.fromJS({
 
 const stream = Rx.Observable
     .fromEvent(document, 'keypress')
+    .startWith(state)
     .scan((previous, event) => {
         if (event.keyCode === 32) {
             return previous.set('direction', previous.get('direction') * (-1));
         }
         return previous;
-    }, state)
+    })
     .distinctUntilChanged();
 
 export default stream;
