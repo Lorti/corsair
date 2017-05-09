@@ -93,7 +93,7 @@ function setup() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     }, false);
 
-    return ({ state }) => {
+    return (state) => {
         controls.update(); // TODO
         if (!coins.children.length) {
             state.get('coins').forEach((coin) => {

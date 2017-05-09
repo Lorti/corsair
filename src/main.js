@@ -3,6 +3,7 @@
 
 import Rx from 'rxjs/Rx';
 import Immutable from 'immutable';
+import clock from './clock.js';
 import renderer from './rendering';
 
 const update = renderer();
@@ -26,16 +27,6 @@ const initialState = Immutable.fromJS({
     coins: coinFactory(),
 });
 
-const clock = Rx.Observable
-    .interval(0, Rx.Scheduler.animationFrame)
-    .map(() => ({
-        time: window.performance.now(),
-        delta: 1,
-    }))
-    .scan((previous, current) => ({
-        time: current.time,
-        delta: current.time - previous.time,
-    }));
 
 const input = Rx.Observable
     .fromEvent(document, 'keypress')
@@ -48,7 +39,7 @@ const input = Rx.Observable
 
 const player = clock
     .map(clock => state => state.set('position',
-        (state.get('position') + (clock.delta * state.get('direction') * state.get('speed')) + 2 * Math.PI) % (2 * Math.PI), // TODO
+        (state.get('position') + (clock.get('delta') * state.get('direction') * state.get('speed')) + 2 * Math.PI) % (2 * Math.PI), // TODO
     ));
 
 const updateCoins = state => state.update('coins', coins => coins.map((coin) => { // TODO
@@ -68,8 +59,12 @@ const state = Rx.Observable
     .merge(input, player)
     .scan((state, reducer) => updateCoins(reducer(state)), initialState);
 
-const loop = clock.withLatestFrom(state, (clock, state) => ({ clock, state }));
-
-loop.subscribe(({ clock, state }) => {
-    update({ clock, state });
+state.subscribe(state => {
+    update(state);
 });
+
+//const loop = clock.withLatestFrom(state, (clock, state) => ({ clock, state }));
+//
+//state.subscribe(({ clock, state }) => {
+//    update({ clock, state });
+//});
