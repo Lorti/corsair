@@ -44,7 +44,6 @@ const player = clock.withLatestFrom(input)
         });
     });
 
-// TODO How is this supposed to be in Immutable.js?
 const updateCoins = state => state.update('coins', coins => coins.map((coin) => {
     if (coin.get('collision', false)) {
         return coin.set('collected', true);
@@ -65,7 +64,10 @@ const updateCoins = state => state.update('coins', coins => coins.map((coin) => 
 
 const state = Rx.Observable
     .merge(player)
-    .scan((state, reducer) => updateCoins(reducer(state)), initialState);
+    .scan((state, reducer) => {
+        const reducers = [reducer, updateCoins];
+        return reducers.reduce((state, reducer) => reducer(state), state);
+    }, initialState);
 
 const loop = clock.withLatestFrom(state, (clock, state) => state);
 loop.subscribe(state => update(state));
