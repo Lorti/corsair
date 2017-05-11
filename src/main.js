@@ -5,22 +5,10 @@ import Rx from 'rxjs/Rx';
 import Immutable from 'immutable';
 import clock from './clock';
 import input from './input';
+import { coinFactory, detectCollision } from './helpers';
 import renderer from './rendering';
 
 const update = renderer();
-
-function coinFactory() {
-    const coins = [];
-    for (let i = 0; i < 24; i++) {
-        coins.push({
-            angle: ((2 * Math.PI) / 24) * i,
-            radius: 1,
-            collision: false,
-            collected: false,
-        });
-    }
-    return coins;
-}
 
 const initialState = Immutable.fromJS({
     player: {
@@ -44,30 +32,26 @@ const player = clock.withLatestFrom(input)
         });
     });
 
-const updateCoins = state => state.update('coins', coins => coins.map((coin) => {
-    if (coin.get('collision', false)) {
-        return coin.set('collected', true);
-    }
-
-    const coinPosition = coin.get('angle');
-    const coinRadius = ((2 * Math.PI) / 360) * coin.get('radius');
+const coins = clock.map(clock => state => state.update('coins', (coins) => {
     const playerPosition = state.getIn(['player', 'position']);
-    const playerRadius = ((2 * Math.PI) / 360) * state.getIn(['player', 'radius']);
+    const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
+    const playerRadius = state.getIn(['player', 'radius']) * Math.PI / 180;
 
-    // TODO Increase resolution of this collision detection, so that we don't miss hits!
-    if (Math.abs(playerPosition - coinPosition) <= coinRadius + playerRadius) {
-        return coin.set('collision', true);
-    }
+    return coins.map((coin) => {
+        const coinPosition = coin.get('angle');
+        const coinSpeed = 0;
+        const coinRadius = coin.get('radius') * Math.PI / 180;
 
-    return coin;
+        if (detectCollision(playerPosition, playerSpeed, playerRadius, coinPosition, coinSpeed, coinRadius, 4)) {
+            return coin.set('collected', true);
+        }
+
+        return coin;
+    });
 }));
 
 const state = Rx.Observable
-    .merge(player)
-    .scan((state, reducer) => {
-        const reducers = [reducer, updateCoins];
-        return reducers.reduce((state, reducer) => reducer(state), state);
-    }, initialState);
+    .merge(player, coins)
+    .scan((state, reducer) => reducer(state), initialState);
 
-const loop = clock.withLatestFrom(state, (clock, state) => state);
-loop.subscribe(state => update(state));
+state.subscribe(state => update(state));

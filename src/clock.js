@@ -3,7 +3,7 @@ import Immutable from 'immutable';
 
 const state = Immutable.fromJS({
     time: performance.now(),
-    delta: 1,
+    delta: 0,
 });
 
 const stream = Rx.Observable
