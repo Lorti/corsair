@@ -16,15 +16,15 @@ function polarToCartesian(angle, radius) {
     return { x, y };
 }
 
-function detectCollision(aPosition, aDirection, aRadius,
-                         bPosition, bDirection, bRadius,
+function detectCollision(playerPosition, playerDirection, playerRadius,
+                         objectPosition, objectDirection, objectRadius,
                          resolution = 1) {
     const circleCollision = (aPos, bPos, aRad, bRad) => Math.abs(aPos - bPos) <= aRad + bRad;
     for (let i = 0; i < resolution; i++) {
         const intermediateFrame = (1 / resolution) * i;
-        const aPos = aPosition + aDirection * intermediateFrame;
-        const bPos = bPosition + bDirection * intermediateFrame;
-        if (circleCollision(aPos, bPos, aRadius, bRadius)) {
+        const aPos = playerPosition + playerDirection * intermediateFrame;
+        const bPos = objectPosition + objectDirection * intermediateFrame;
+        if (circleCollision(aPos, bPos, playerRadius, objectRadius)) {
             return true;
         }
     }
