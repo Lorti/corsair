@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { polarToCartesian } from './helpers';
-import OrbitControls from './OrbitControls'; // TODO
+import OrbitControls from './vendor/OrbitControls'; // TODO
 
 const RADIUS = 50;
 let controls; // TODO
