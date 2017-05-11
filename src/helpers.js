@@ -1,11 +1,15 @@
 function coinFactory() {
     const coins = [];
-    for (let i = 0; i < 24; i++) {
-        coins.push({
-            angle: ((2 * Math.PI) / 24) * i,
+    const n = 24;
+    for (let i = 0; i < n; i++) {
+        const coin = {
+            angle: ((2 * Math.PI) / n) * i,
             radius: 1,
             collected: false,
-        });
+        };
+        if (coin.angle !== Math.PI / 2) {
+            coins.push(coin);
+        }
     }
     return coins;
 }

@@ -8,8 +8,6 @@ import input from './input';
 import { coinFactory, detectCollision } from './helpers';
 import renderer from './rendering';
 
-const update = renderer();
-
 const initialState = Immutable.fromJS({
     player: {
         position: Math.PI * 0.5,
@@ -20,19 +18,20 @@ const initialState = Immutable.fromJS({
     coins: coinFactory(),
 });
 
-const player = clock.withLatestFrom(input)
-    .map(([clock, input]) => (state) => {
-        const position = state.getIn(['player', 'position']) + clock.get('delta') * input.get('direction') * state.get('speed');
-        const normalized = (position + 2 * Math.PI) % (2 * Math.PI);
-        return state.mergeDeep({
-            player: {
-                position: normalized,
-                direction: input.get('direction'),
-            },
-        });
-    });
+const events = clock.withLatestFrom(input);
 
-const coins = clock.map(clock => state => state.update('coins', (coins) => {
+const player = events.map(([clock, input]) => (state) => {
+    const position = state.getIn(['player', 'position']) + clock.get('delta') * input.get('direction') * state.get('speed');
+    const normalized = (position + 2 * Math.PI) % (2 * Math.PI);
+    return state.mergeDeep({
+        player: {
+            position: normalized,
+            direction: input.get('direction'),
+        },
+    });
+});
+
+const coins = events.map(([clock]) => state => state.update('coins', (coins) => {
     const playerPosition = state.getIn(['player', 'position']);
     const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
     const playerRadius = state.getIn(['player', 'radius']) * Math.PI / 180;
@@ -54,4 +53,6 @@ const state = Rx.Observable
     .merge(player, coins)
     .scan((state, reducer) => reducer(state), initialState);
 
+const update = renderer();
+update(initialState);
 state.subscribe(state => update(state));
