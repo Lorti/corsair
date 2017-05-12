@@ -5,7 +5,7 @@ import Rx from 'rxjs/Rx';
 import Immutable from 'immutable';
 import clock from './clock';
 import input from './input';
-import { coinFactory, cannonballFactory, detectCollision } from './helpers';
+import { coinFactory, cannonballFactory, polarToCartesian, detectCollision1D, detectCollision2D } from './helpers';
 import renderer from './rendering';
 
 const initialState = Immutable.fromJS({
@@ -42,7 +42,7 @@ const coins = events.map(([clock]) => state => state.update('coins', (coins) => 
         const coinSpeed = 0;
         const coinRadius = coin.get('radius') * Math.PI / 180;
 
-        if (detectCollision(playerPosition, playerSpeed, playerRadius, coinPosition, coinSpeed, coinRadius, 4)) {
+        if (detectCollision1D(playerPosition, playerSpeed, playerRadius, coinPosition, coinSpeed, coinRadius, 4)) {
             return coin.set('collected', true);
         }
 
@@ -54,20 +54,22 @@ const cannonballs = events.map(([clock]) => state =>
     state.update('cannonballs', (cannonballs) => {
         const playerPosition = state.getIn(['player', 'position']);
         const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
-        const playerRadius = state.getIn(['player', 'radius']) * Math.PI / 180;
+        const playerRadius = state.getIn(['player', 'radius']);
 
         return cannonballs.map((cannonball) => {
             const cannonballPosition = cannonball.get('angle');
             const cannonballSpeed = clock.get('delta') * state.get('speed') * 50;
-            const cannonballRadius = cannonball.get('size') * Math.PI / 180;
+            const cannonballRadius = cannonball.get('size');
 
             // TODO
-            let collision = false;
-            if (cannonball.get('radius') >= 45 && cannonball.get('radius') <= 55) {
-                if (detectCollision(playerPosition, playerSpeed, playerRadius, cannonballPosition, 0, cannonballRadius, 4)) {
-                    collision = true;
-                }
-            }
+            const collision = detectCollision2D(
+                polarToCartesian(playerPosition, 50),
+                polarToCartesian(playerPosition + (Math.PI / 2) * state.getIn(['player', 'direction']), 50).setLength(playerSpeed),
+                playerRadius / 2,
+                polarToCartesian(cannonballPosition, cannonball.get('radius')),
+                polarToCartesian(cannonballPosition, 1).setLength(cannonballSpeed),
+                cannonballRadius,
+                4);
 
             return cannonball.update('radius', radius => radius + cannonballSpeed).set('collision', collision);
         });

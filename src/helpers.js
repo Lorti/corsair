@@ -1,3 +1,5 @@
+import { Vector2 } from 'three';
+
 function coinFactory() {
     const coins = [];
     const n = 32;
@@ -26,10 +28,10 @@ function cannonballFactory() {
 function polarToCartesian(angle, radius) {
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
-    return { x, y };
+    return new Vector2(x, y);
 }
 
-function detectCollision(playerPosition, playerDirection, playerRadius,
+function detectCollision1D(playerPosition, playerDirection, playerRadius,
                          objectPosition, objectDirection, objectRadius,
                          resolution = 1) {
     const circleCollision = (aPos, bPos, aRad, bRad) => Math.abs(aPos - bPos) <= aRad + bRad;
@@ -44,9 +46,25 @@ function detectCollision(playerPosition, playerDirection, playerRadius,
     return false;
 }
 
+function detectCollision2D(playerPosition, playerDirection, playerRadius,
+                           objectPosition, objectDirection, objectRadius,
+                           resolution = 1) {
+    const circleCollision = (aPos, bPos, aRad, bRad) => aPos.distanceTo(bPos) <= aRad + bRad;
+    for (let i = 0; i < resolution; i++) {
+        const intermediateFrame = (1 / resolution) * i;
+        const aPos = playerPosition.add(playerDirection.multiplyScalar(intermediateFrame));
+        const bPos = objectPosition.add(objectDirection.multiplyScalar(intermediateFrame));
+        if (circleCollision(aPos, bPos, playerRadius, objectRadius)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export {
     coinFactory,
     cannonballFactory,
     polarToCartesian,
-    detectCollision,
+    detectCollision1D,
+    detectCollision2D,
 };
