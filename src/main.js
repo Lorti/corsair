@@ -5,7 +5,7 @@ import Rx from 'rxjs/Rx';
 import Immutable from 'immutable';
 import clock from './clock';
 import input from './input';
-import { coinFactory, detectCollision } from './helpers';
+import { coinFactory, cannonballFactory, detectCollision } from './helpers';
 import renderer from './rendering';
 
 const initialState = Immutable.fromJS({
@@ -16,6 +16,7 @@ const initialState = Immutable.fromJS({
     },
     speed: 1.25 / 1000,
     coins: coinFactory(),
+    cannonballs: [],
 });
 
 const events = clock.withLatestFrom(input);
@@ -49,9 +50,25 @@ const coins = events.map(([clock]) => state => state.update('coins', (coins) => 
     });
 }));
 
+const cannonballs = events.map(([clock]) => state =>
+    state.update('cannonballs', cannonballs => cannonballs.map(cannonball =>
+        cannonball.update('radius', radius => radius + clock.get('delta') * state.get('speed') * 50))
+    ));
+
+const cannon = events.throttleTime(1000).map(() => state =>
+    state.update('cannonballs', cannonballs => cannonballs.push(Immutable.fromJS(cannonballFactory()))),
+);
+
+const score = events.map(() => (state) => {
+    const lootCollected = state.get('coins').some(coin => !coin.get('collected'));
+    const shipDestroyed = state.get('cannonballs').find(cannonball => cannonball.get('collision'));
+    return state.set('gameOver', !lootCollected || shipDestroyed);
+});
+
 const state = Rx.Observable
-    .merge(player, coins)
-    .scan((state, reducer) => reducer(state), initialState);
+    .merge(player, cannon, coins, cannonballs, score)
+    .scan((state, reducer) => reducer(state), initialState)
+    .takeWhile(state => !state.get('gameOver'));
 
 const update = renderer();
 update(initialState);

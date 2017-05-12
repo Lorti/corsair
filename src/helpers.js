@@ -1,6 +1,6 @@
 function coinFactory() {
     const coins = [];
-    const n = 24;
+    const n = 32;
     for (let i = 0; i < n; i++) {
         const coin = {
             angle: ((2 * Math.PI) / n) * i,
@@ -12,6 +12,15 @@ function coinFactory() {
         }
     }
     return coins;
+}
+
+function cannonballFactory() {
+    return {
+        angle: Math.random() * 2 * Math.PI, // TODO
+        radius: 0, // TODO
+        size: 1,
+        collision: false,
+    };
 }
 
 function polarToCartesian(angle, radius) {
@@ -37,6 +46,7 @@ function detectCollision(playerPosition, playerDirection, playerRadius,
 
 export {
     coinFactory,
+    cannonballFactory,
     polarToCartesian,
     detectCollision,
 };

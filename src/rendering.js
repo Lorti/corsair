@@ -53,6 +53,17 @@ function coinFactory() {
     return cylinder;
 }
 
+function cannonballFactory() {
+    return new THREE.Mesh(
+        new THREE.SphereGeometry(2, 32, 32),
+        new THREE.MeshPhongMaterial({
+            color: 0x156289,
+            emissive: 0x072534,
+            shading: THREE.FlatShading,
+        }),
+    );
+}
+
 function setup() {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -80,10 +91,12 @@ function setup() {
     const circle = circleFactory();
     const ship = shipFactory();
     const coins = new THREE.Object3D();
+    const cannonballs = new THREE.Object3D();
 
     scene.add(circle);
     scene.add(ship);
     scene.add(coins);
+    scene.add(cannonballs);
 
     controls = new OrbitControls(camera, renderer.domElement); // TODO
 
@@ -95,6 +108,7 @@ function setup() {
 
     return (state) => {
         controls.update(); // TODO
+
         if (!coins.children.length) {
             state.get('coins').forEach((coin) => {
                 const mesh = coinFactory();
@@ -107,11 +121,24 @@ function setup() {
         for (let i = 0; i < state.get('coins').size; i++) {
             coins.children[i].visible = !state.getIn(['coins', i, 'collected']);
         }
+
+        for (let i = 0; i < state.get('cannonballs').size; i++) {
+            const cannonball = cannonballs.children[i];
+            if (!cannonball) {
+                cannonballs.add(cannonballFactory());
+            } else {
+                const position = polarToCartesian(state.getIn(['cannonballs', i, 'angle'], 0), state.getIn(['cannonballs', i, 'radius']), 0);
+                cannonball.position.x = position.x;
+                cannonball.position.y = position.y;
+            }
+        }
+
         ship.scale.y = state.getIn(['player', 'direction']); // TODO
         ship.rotation.z = state.getIn(['player', 'position']) + (Math.PI * 2);
         const position = polarToCartesian(state.getIn(['player', 'position']), RADIUS);
         ship.position.x = position.x;
         ship.position.y = position.y;
+
         renderer.render(scene, camera);
     };
 }
