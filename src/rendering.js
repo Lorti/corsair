@@ -107,6 +107,7 @@ function setup() {
 
     return (state) => {
         controls.update(); // TODO
+        console.log(state.get('score')); // TODO
 
         if (!coins.children.length) {
             state.get('coins').forEach((coin) => {

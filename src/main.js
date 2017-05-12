@@ -48,6 +48,8 @@ const initialState = Immutable.fromJS({
     speed: 1.25 / 1000,
     coins: coinFactory(),
     cannonballs: [],
+    score: 0,
+    finish: false,
 });
 
 const events = clock.withLatestFrom(input);
@@ -128,15 +130,18 @@ const cannon = events.throttleTime(1000).map(() => state =>
 );
 
 const score = events.map(() => (state) => {
+    const score = state.get('coins').reduce((score, coin) => score + coin.get('collected'), 0);
     const lootCollected = state.get('coins').some(coin => !coin.get('collected'));
     const shipDestroyed = state.get('cannonballs').find(cannonball => cannonball.get('collision'));
-    return state.set('gameOver', !lootCollected || shipDestroyed);
+    return state
+        .set('score', score)
+        .set('finish', !lootCollected || shipDestroyed);
 });
 
 const state = Rx.Observable
     .merge(player, cannon, coins, cannonballs, score)
     .scan((state, reducer) => reducer(state), initialState)
-    .takeWhile(state => !state.get('gameOver'));
+    .takeWhile(state => !state.get('finish'));
 
 const update = renderer();
 update(initialState);
