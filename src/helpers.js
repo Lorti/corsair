@@ -31,22 +31,7 @@ function polarToCartesian(angle, radius) {
     return new Vector2(x, y);
 }
 
-function detectCollision1D(playerPosition, playerDirection, playerRadius,
-                         objectPosition, objectDirection, objectRadius,
-                         resolution = 1) {
-    const circleCollision = (aPos, bPos, aRad, bRad) => Math.abs(aPos - bPos) <= aRad + bRad;
-    for (let i = 0; i < resolution; i++) {
-        const intermediateFrame = (1 / resolution) * i;
-        const aPos = playerPosition + playerDirection * intermediateFrame;
-        const bPos = objectPosition + objectDirection * intermediateFrame;
-        if (circleCollision(aPos, bPos, playerRadius, objectRadius)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function detectCollision2D(playerPosition, playerDirection, playerRadius,
+function detectCollision(playerPosition, playerDirection, playerRadius,
                            objectPosition, objectDirection, objectRadius,
                            resolution = 1) {
     const circleCollision = (aPos, bPos, aRad, bRad) => aPos.distanceTo(bPos) <= aRad + bRad;
@@ -65,6 +50,5 @@ export {
     coinFactory,
     cannonballFactory,
     polarToCartesian,
-    detectCollision1D,
-    detectCollision2D,
+    detectCollision,
 };

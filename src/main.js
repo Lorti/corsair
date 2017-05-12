@@ -3,9 +3,10 @@
 
 import Rx from 'rxjs/Rx';
 import Immutable from 'immutable';
+import { Vector2 } from 'three';
 import clock from './clock';
 import input from './input';
-import { coinFactory, cannonballFactory, polarToCartesian, detectCollision1D, detectCollision2D } from './helpers';
+import { coinFactory, cannonballFactory, polarToCartesian, detectCollision } from './helpers';
 import renderer from './rendering';
 
 const initialState = Immutable.fromJS({
@@ -42,7 +43,8 @@ const coins = events.map(([clock]) => state => state.update('coins', (coins) => 
         const coinSpeed = 0;
         const coinRadius = coin.get('radius') * Math.PI / 180;
 
-        if (detectCollision1D(playerPosition, playerSpeed, playerRadius, coinPosition, coinSpeed, coinRadius, 4)) {
+        if (detectCollision(new Vector2(playerPosition, 0), new Vector2(playerSpeed, 0), playerRadius,
+                new Vector2(coinPosition, 0), new Vector2(coinSpeed, 0), coinRadius, 4)) {
             return coin.set('collected', true);
         }
 
@@ -62,7 +64,7 @@ const cannonballs = events.map(([clock]) => state =>
             const cannonballRadius = cannonball.get('size');
 
             // TODO
-            const collision = detectCollision2D(
+            const collision = detectCollision(
                 polarToCartesian(playerPosition, 50),
                 polarToCartesian(playerPosition + (Math.PI / 2) * state.getIn(['player', 'direction']), 50).setLength(playerSpeed),
                 playerRadius,
