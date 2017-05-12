@@ -51,9 +51,27 @@ const coins = events.map(([clock]) => state => state.update('coins', (coins) => 
 }));
 
 const cannonballs = events.map(([clock]) => state =>
-    state.update('cannonballs', cannonballs => cannonballs.map(cannonball =>
-        cannonball.update('radius', radius => radius + clock.get('delta') * state.get('speed') * 50))
-    ));
+    state.update('cannonballs', (cannonballs) => {
+        const playerPosition = state.getIn(['player', 'position']);
+        const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
+        const playerRadius = state.getIn(['player', 'radius']) * Math.PI / 180;
+
+        return cannonballs.map((cannonball) => {
+            const cannonballPosition = cannonball.get('angle');
+            const cannonballSpeed = clock.get('delta') * state.get('speed') * 50;
+            const cannonballRadius = cannonball.get('size') * Math.PI / 180;
+
+            // TODO
+            let collision = false;
+            if (cannonball.get('radius') >= 45 && cannonball.get('radius') <= 55) {
+                if (detectCollision(playerPosition, playerSpeed, playerRadius, cannonballPosition, 0, cannonballRadius, 4)) {
+                    collision = true;
+                }
+            }
+
+            return cannonball.update('radius', radius => radius + cannonballSpeed).set('collision', collision);
+        });
+    }));
 
 const cannon = events.throttleTime(1000).map(() => state =>
     state.update('cannonballs', cannonballs => cannonballs.push(Immutable.fromJS(cannonballFactory()))),
