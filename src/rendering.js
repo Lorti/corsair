@@ -112,7 +112,7 @@ function setup() {
         if (!coins.children.length) {
             state.get('coins').forEach((coin) => {
                 const mesh = coinFactory();
-                const position = polarToCartesian(coin.get('angle'), RADIUS);
+                const position = polarToCartesian(coin.get('angle'), coin.get('radius'));
                 mesh.position.x = position.x;
                 mesh.position.y = position.y;
                 coins.add(mesh);
@@ -127,15 +127,18 @@ function setup() {
             if (!cannonball) {
                 cannonballs.add(cannonballFactory());
             } else {
-                const position = polarToCartesian(state.getIn(['cannonballs', i, 'angle'], 0), state.getIn(['cannonballs', i, 'radius']), 0);
+                const position = polarToCartesian(
+                    state.getIn(['cannonballs', i, 'angle'], 0),
+                    state.getIn(['cannonballs', i, 'radius'], 0),
+                );
                 cannonball.position.x = position.x;
                 cannonball.position.y = position.y;
             }
         }
 
         ship.scale.y = state.getIn(['player', 'direction']); // TODO
-        ship.rotation.z = state.getIn(['player', 'position']) + (Math.PI * 2);
-        const position = polarToCartesian(state.getIn(['player', 'position']), RADIUS);
+        ship.rotation.z = state.getIn(['player', 'angle']) + (Math.PI * 2);
+        const position = polarToCartesian(state.getIn(['player', 'angle']), state.getIn(['player', 'radius']));
         ship.position.x = position.x;
         ship.position.y = position.y;
 

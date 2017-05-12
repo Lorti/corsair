@@ -9,12 +9,16 @@ import input from './input';
 import { polarToCartesian, detectCollision } from './helpers';
 import renderer from './rendering';
 
+const COINS = 32;
+const RADIUS = 50;
+
 function coinFactory() {
     const coins = [];
-    const n = 32;
+    const n = COINS;
     for (let i = 0; i < n; i++) {
         const coin = {
             angle: ((2 * Math.PI) / n) * i,
+            radius: RADIUS,
             size: 1,
             collected: false,
         };
@@ -27,8 +31,8 @@ function coinFactory() {
 
 function cannonballFactory() {
     return {
-        angle: Math.random() * 2 * Math.PI, // TODO
-        radius: 0, // TODO
+        angle: Math.random() * 2 * Math.PI,
+        radius: 0,
         size: 1,
         collision: false,
     };
@@ -36,7 +40,8 @@ function cannonballFactory() {
 
 const initialState = Immutable.fromJS({
     player: {
-        position: Math.PI * 0.5,
+        angle: Math.PI * 0.5,
+        radius: RADIUS,
         direction: -1,
         size: 6,
     },
@@ -48,18 +53,18 @@ const initialState = Immutable.fromJS({
 const events = clock.withLatestFrom(input);
 
 const player = events.map(([clock, input]) => (state) => {
-    const position = state.getIn(['player', 'position']) + clock.get('delta') * input.get('direction') * state.get('speed');
+    const position = state.getIn(['player', 'angle']) + clock.get('delta') * input.get('direction') * state.get('speed');
     const normalized = (position + 2 * Math.PI) % (2 * Math.PI);
     return state.mergeDeep({
         player: {
-            position: normalized,
+            angle: normalized,
             direction: input.get('direction'),
         },
     });
 });
 
 const coins = events.map(([clock]) => state => state.update('coins', (coins) => {
-    const playerPosition = state.getIn(['player', 'position']);
+    const playerPosition = state.getIn(['player', 'angle']);
     const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
     const playerSize = state.getIn(['player', 'size']) * Math.PI / 180;
 
@@ -79,7 +84,7 @@ const coins = events.map(([clock]) => state => state.update('coins', (coins) => 
 
 const cannonballs = events.map(([clock]) => state =>
     state.update('cannonballs', (cannonballs) => {
-        const playerPosition = state.getIn(['player', 'position']);
+        const playerPosition = state.getIn(['player', 'angle']);
         const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
         const playerSize = state.getIn(['player', 'size']);
 
