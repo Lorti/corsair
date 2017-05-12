@@ -65,29 +65,30 @@ const player = events.map(([clock, input]) => (state) => {
     });
 });
 
-const coins = events.map(([clock]) => state => state.update('coins', (coins) => {
-    const playerAngle = state.getIn(['player', 'angle']);
-    const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
-    const playerSize = state.getIn(['player', 'size']) * Math.PI / 180;
+const coins = events.map(([clock]) => state =>
+    state.update('coins', (coins) => {
+        const playerAngle = state.getIn(['player', 'angle']);
+        const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
+        const playerSize = state.getIn(['player', 'size']) * Math.PI / 180;
 
-    return coins.map((coin) => {
-        const coinAngle = coin.get('angle');
-        const coinSpeed = 0;
-        const coinSize = coin.get('size') * Math.PI / 180;
+        return coins.map((coin) => {
+            const coinAngle = coin.get('angle');
+            const coinSpeed = 0;
+            const coinSize = coin.get('size') * Math.PI / 180;
 
-        const collision = detectCollision(
-            new Vector2(playerAngle, 0), new Vector2(playerSpeed, 0), playerSize,
-            new Vector2(coinAngle, 0), new Vector2(coinSpeed, 0), coinSize,
-            4,
-        );
+            const collision = detectCollision(
+                new Vector2(playerAngle, 0), new Vector2(playerSpeed, 0), playerSize,
+                new Vector2(coinAngle, 0), new Vector2(coinSpeed, 0), coinSize,
+                4,
+            );
 
-        if (collision) {
-            return coin.set('collected', true);
-        }
+            if (collision) {
+                return coin.set('collected', true);
+            }
 
-        return coin;
-    });
-}));
+            return coin;
+        });
+    }));
 
 const cannonballs = events.map(([clock]) => state =>
     state.update('cannonballs', (cannonballs) => {
