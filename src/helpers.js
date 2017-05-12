@@ -1,30 +1,5 @@
 import { Vector2 } from 'three';
 
-function coinFactory() {
-    const coins = [];
-    const n = 32;
-    for (let i = 0; i < n; i++) {
-        const coin = {
-            angle: ((2 * Math.PI) / n) * i,
-            radius: 1,
-            collected: false,
-        };
-        if (coin.angle !== Math.PI / 2) {
-            coins.push(coin);
-        }
-    }
-    return coins;
-}
-
-function cannonballFactory() {
-    return {
-        angle: Math.random() * 2 * Math.PI, // TODO
-        radius: 0, // TODO
-        size: 1,
-        collision: false,
-    };
-}
-
 function polarToCartesian(angle, radius) {
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
@@ -47,8 +22,6 @@ function detectCollision(playerPosition, playerDirection, playerRadius,
 }
 
 export {
-    coinFactory,
-    cannonballFactory,
     polarToCartesian,
     detectCollision,
 };

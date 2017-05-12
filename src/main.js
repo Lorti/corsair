@@ -6,14 +6,39 @@ import Immutable from 'immutable';
 import { Vector2 } from 'three';
 import clock from './clock';
 import input from './input';
-import { coinFactory, cannonballFactory, polarToCartesian, detectCollision } from './helpers';
+import { polarToCartesian, detectCollision } from './helpers';
 import renderer from './rendering';
+
+function coinFactory() {
+    const coins = [];
+    const n = 32;
+    for (let i = 0; i < n; i++) {
+        const coin = {
+            angle: ((2 * Math.PI) / n) * i,
+            size: 1,
+            collected: false,
+        };
+        if (coin.angle !== Math.PI / 2) {
+            coins.push(coin);
+        }
+    }
+    return coins;
+}
+
+function cannonballFactory() {
+    return {
+        angle: Math.random() * 2 * Math.PI, // TODO
+        radius: 0, // TODO
+        size: 1,
+        collision: false,
+    };
+}
 
 const initialState = Immutable.fromJS({
     player: {
         position: Math.PI * 0.5,
         direction: -1,
-        radius: 6,
+        size: 6,
     },
     speed: 1.25 / 1000,
     coins: coinFactory(),
@@ -36,15 +61,15 @@ const player = events.map(([clock, input]) => (state) => {
 const coins = events.map(([clock]) => state => state.update('coins', (coins) => {
     const playerPosition = state.getIn(['player', 'position']);
     const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
-    const playerRadius = state.getIn(['player', 'radius']) * Math.PI / 180;
+    const playerSize = state.getIn(['player', 'size']) * Math.PI / 180;
 
     return coins.map((coin) => {
         const coinPosition = coin.get('angle');
         const coinSpeed = 0;
-        const coinRadius = coin.get('radius') * Math.PI / 180;
+        const coinSize = coin.get('size') * Math.PI / 180;
 
-        if (detectCollision(new Vector2(playerPosition, 0), new Vector2(playerSpeed, 0), playerRadius,
-                new Vector2(coinPosition, 0), new Vector2(coinSpeed, 0), coinRadius, 4)) {
+        if (detectCollision(new Vector2(playerPosition, 0), new Vector2(playerSpeed, 0), playerSize,
+                new Vector2(coinPosition, 0), new Vector2(coinSpeed, 0), coinSize, 4)) {
             return coin.set('collected', true);
         }
 
@@ -56,7 +81,7 @@ const cannonballs = events.map(([clock]) => state =>
     state.update('cannonballs', (cannonballs) => {
         const playerPosition = state.getIn(['player', 'position']);
         const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
-        const playerRadius = state.getIn(['player', 'radius']);
+        const playerSize = state.getIn(['player', 'size']);
 
         return cannonballs.map((cannonball) => {
             const cannonballPosition = cannonball.get('angle');
@@ -67,7 +92,7 @@ const cannonballs = events.map(([clock]) => state =>
             const collision = detectCollision(
                 polarToCartesian(playerPosition, 50),
                 polarToCartesian(playerPosition + (Math.PI / 2) * state.getIn(['player', 'direction']), 50).setLength(playerSpeed),
-                playerRadius,
+                playerSize,
                 polarToCartesian(cannonballPosition, cannonball.get('radius')),
                 polarToCartesian(cannonballPosition, 1).setLength(cannonballSpeed),
                 cannonballRadius,
