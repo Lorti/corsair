@@ -65,7 +65,7 @@ const cannonballs = events.map(([clock]) => state =>
             const collision = detectCollision2D(
                 polarToCartesian(playerPosition, 50),
                 polarToCartesian(playerPosition + (Math.PI / 2) * state.getIn(['player', 'direction']), 50).setLength(playerSpeed),
-                playerRadius / 2,
+                playerRadius,
                 polarToCartesian(cannonballPosition, cannonball.get('radius')),
                 polarToCartesian(cannonballPosition, 1).setLength(cannonballSpeed),
                 cannonballRadius,
