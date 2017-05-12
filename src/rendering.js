@@ -2,12 +2,11 @@ import * as THREE from 'three';
 import { polarToCartesian } from './helpers';
 import OrbitControls from './vendor/OrbitControls'; // TODO
 
-const RADIUS = 50;
 let controls; // TODO
 
 function circleFactory() {
     const segmentCount = 64;
-    const radius = RADIUS;
+    const radius = 50;
     const geometry = new THREE.Geometry();
     const material = new THREE.LineBasicMaterial({ color: 0xFFFFFF, opacity: 0.1, transparent: true });
 

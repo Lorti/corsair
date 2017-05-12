@@ -17,7 +17,7 @@ function coinFactory() {
     const n = COINS;
     for (let i = 0; i < n; i++) {
         const coin = {
-            angle: ((2 * Math.PI) / n) * i,
+            angle: ((Math.PI * 2) / n) * i,
             radius: RADIUS,
             size: 1,
             collected: false,
@@ -31,7 +31,7 @@ function coinFactory() {
 
 function cannonballFactory() {
     return {
-        angle: Math.random() * 2 * Math.PI,
+        angle: Math.random() * Math.PI * 2,
         radius: 0,
         size: 1,
         collision: false,
@@ -53,8 +53,10 @@ const initialState = Immutable.fromJS({
 const events = clock.withLatestFrom(input);
 
 const player = events.map(([clock, input]) => (state) => {
-    const position = state.getIn(['player', 'angle']) + clock.get('delta') * input.get('direction') * state.get('speed');
-    const normalized = (position + 2 * Math.PI) % (2 * Math.PI);
+    const position = state.getIn(['player', 'angle']) +
+        clock.get('delta') * input.get('direction') * state.get('speed');
+    const normalized = (position + Math.PI * 2) % (Math.PI * 2);
+
     return state.mergeDeep({
         player: {
             angle: normalized,
@@ -64,17 +66,22 @@ const player = events.map(([clock, input]) => (state) => {
 });
 
 const coins = events.map(([clock]) => state => state.update('coins', (coins) => {
-    const playerPosition = state.getIn(['player', 'angle']);
+    const playerAngle = state.getIn(['player', 'angle']);
     const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
     const playerSize = state.getIn(['player', 'size']) * Math.PI / 180;
 
     return coins.map((coin) => {
-        const coinPosition = coin.get('angle');
+        const coinAngle = coin.get('angle');
         const coinSpeed = 0;
         const coinSize = coin.get('size') * Math.PI / 180;
 
-        if (detectCollision(new Vector2(playerPosition, 0), new Vector2(playerSpeed, 0), playerSize,
-                new Vector2(coinPosition, 0), new Vector2(coinSpeed, 0), coinSize, 4)) {
+        const collision = detectCollision(
+            new Vector2(playerAngle, 0), new Vector2(playerSpeed, 0), playerSize,
+            new Vector2(coinAngle, 0), new Vector2(coinSpeed, 0), coinSize,
+            4,
+        );
+
+        if (collision) {
             return coin.set('collected', true);
         }
 
@@ -84,26 +91,34 @@ const coins = events.map(([clock]) => state => state.update('coins', (coins) => 
 
 const cannonballs = events.map(([clock]) => state =>
     state.update('cannonballs', (cannonballs) => {
-        const playerPosition = state.getIn(['player', 'angle']);
+        const playerAngle = state.getIn(['player', 'angle']);
+        const playerRadius = state.getIn(['player', 'radius']);
+        const playerDirection = state.getIn(['player', 'direction']);
         const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
         const playerSize = state.getIn(['player', 'size']);
 
         return cannonballs.map((cannonball) => {
-            const cannonballPosition = cannonball.get('angle');
+            const cannonballAngle = cannonball.get('angle');
             const cannonballSpeed = clock.get('delta') * state.get('speed') * 50;
             const cannonballRadius = cannonball.get('size');
 
-            // TODO
             const collision = detectCollision(
-                polarToCartesian(playerPosition, 50),
-                polarToCartesian(playerPosition + (Math.PI / 2) * state.getIn(['player', 'direction']), 50).setLength(playerSpeed),
+                polarToCartesian(playerAngle, playerRadius),
+                polarToCartesian(playerAngle + (Math.PI / 2) * playerDirection, playerSpeed),
                 playerSize,
-                polarToCartesian(cannonballPosition, cannonball.get('radius')),
-                polarToCartesian(cannonballPosition, 1).setLength(cannonballSpeed),
+                polarToCartesian(cannonballAngle, cannonball.get('radius')),
+                polarToCartesian(cannonballAngle, 1).setLength(cannonballSpeed),
                 cannonballRadius,
-                4);
+                4,
+            );
 
-            return cannonball.update('radius', radius => radius + cannonballSpeed).set('collision', collision);
+            const next = cannonball.update('radius', radius => radius + cannonballSpeed);
+
+            if (collision) {
+                return next.set('collision', collision);
+            }
+
+            return next;
         });
     }));
 
