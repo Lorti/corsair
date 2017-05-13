@@ -125,11 +125,11 @@ const cannonballs = events.map(([clock]) => state =>
         });
     }));
 
-const cannon = clock.throttleTime(1000).map(() => state =>
+const cannon = events.throttleTime(1000).map(() => state =>
     state.update('cannonballs', cannonballs => cannonballs.push(Immutable.fromJS(cannonballFactory()))),
 );
 
-const score = clock.map(() => (state) => {
+const score = events.map(() => (state) => {
     const score = state.get('coins').reduce((score, coin) => score + coin.get('collected'), 0);
     const lootCollected = state.get('coins').some(coin => !coin.get('collected'));
     const shipDestroyed = state.get('cannonballs').find(cannonball => cannonball.get('collision'));
