@@ -3,6 +3,7 @@ import { polarToCartesian } from './helpers';
 import OrbitControls from './vendor/OrbitControls'; // TODO
 
 let controls; // TODO
+const $score = document.getElementById('score');
 
 function circleFactory() {
     const segmentCount = 64;
@@ -107,7 +108,6 @@ function setup() {
 
     return (state) => {
         controls.update(); // TODO
-        console.log(state.get('score')); // TODO
 
         if (!coins.children.length) {
             state.get('coins').forEach((coin) => {
@@ -143,6 +143,8 @@ function setup() {
         ship.position.y = position.y;
 
         renderer.render(scene, camera);
+
+        $score.innerHTML = state.get('score');
     };
 }
 
