@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import { polarToCartesian } from './helpers';
-import OrbitControls from './vendor/OrbitControls'; // TODO
 
-let controls; // TODO
 const $score = document.getElementById('score');
 
 function circleFactory() {
@@ -98,8 +96,6 @@ function setup() {
     scene.add(coins);
     scene.add(cannonballs);
 
-    controls = new OrbitControls(camera, renderer.domElement); // TODO
-
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -107,8 +103,6 @@ function setup() {
     }, false);
 
     return (state) => {
-        controls.update(); // TODO
-
         if (!coins.children.length) {
             state.get('coins').forEach((coin) => {
                 const mesh = coinFactory();
@@ -143,7 +137,6 @@ function setup() {
         ship.position.y = position.y;
 
         renderer.render(scene, camera);
-
         $score.innerHTML = state.get('score');
     };
 }
