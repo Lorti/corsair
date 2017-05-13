@@ -116,6 +116,11 @@ function setup() {
             coins.children[i].visible = !state.getIn(['coins', i, 'collected']);
         }
 
+        if (!cannonballs.children.length) {
+            for (let i = 0; i < 25; i++) {
+                cannonballs.add(cannonballFactory());
+            }
+        }
         for (let i = 0; i < state.get('cannonballs').size; i++) {
             const cannonball = cannonballs.children[i];
             if (!cannonball) {
