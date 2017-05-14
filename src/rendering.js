@@ -44,8 +44,8 @@ function shipFactory() {
                 node.material.side = THREE.DoubleSide;
             }
         });
-        ship.scale.multiplyScalar(3);
-        ship.rotation.set(Math.PI / 2, Math.PI * 2, 0);
+        ship.scale.multiplyScalar(9);
+        ship.rotation.set(Math.PI / 2, Math.PI, 0);
         container.add(ship);
     });
     return container;
@@ -81,24 +81,27 @@ function setup() {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 100;
 
+    const axisHelper = new THREE.AxisHelper(10);
+    scene.add(axisHelper);
+
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x333333, 1);
     document.body.appendChild(renderer.domElement);
 
-    const lights = [];
-    lights[0] = new THREE.PointLight(0xffffff, 1, 0);
-    lights[1] = new THREE.PointLight(0xffffff, 1, 0);
-    lights[2] = new THREE.PointLight(0xffffff, 1, 0);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
+    hemiLight.color.setHSL(0.6, 1, 0.6);
+    hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+    hemiLight.position.set(0, 500, 0);
+    scene.add(hemiLight);
 
-    lights[0].position.set(0, 2000, 0);
-    lights[1].position.set(1000, 2000, 1000);
-    lights[2].position.set(-1000, -2000, -1000);
-
-    scene.add(lights[0]);
-    scene.add(lights[1]);
-    scene.add(lights[2]);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.color.setHSL(0.1, 1, 0.95);
+    dirLight.position.set(-1, 1, -1);
+    dirLight.position.multiplyScalar(50);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
 
     const circle = circleFactory();
     const ship = shipFactory();

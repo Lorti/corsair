@@ -1,8 +1,8 @@
 newmtl Default
-Kd 0.48 0.48 0.48
-map_Kd texture.png
+Kd 1 1 1
 Ns 256
 d 1
 illum 2
 Ka 0 0 0
-Ks 0.2 0.2 0.2
+Ks 0 0 0
+map_Kd ship.png
