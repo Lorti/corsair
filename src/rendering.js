@@ -78,7 +78,7 @@ function cannonballFactory() {
 
 function setup() {
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 50, 150);
     camera.position.z = 100;
 
     const axisHelper = new THREE.AxisHelper(10);
