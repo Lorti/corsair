@@ -93,12 +93,12 @@ function setup() {
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
     hemiLight.color.setHSL(0.6, 1, 0.6);
     hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-    hemiLight.position.set(0, 500, 0);
+    hemiLight.position.set(0, 0, 500);
     scene.add(hemiLight);
 
     const dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.color.setHSL(0.1, 1, 0.95);
-    dirLight.position.set(-1, 1, -1);
+    dirLight.position.set(-1, 1, 1);
     dirLight.position.multiplyScalar(50);
     dirLight.castShadow = true;
     scene.add(dirLight);
@@ -152,8 +152,10 @@ function setup() {
             }
         }
 
-        ship.scale.y = state.getIn(['player', 'direction']);
-        ship.rotation.z = state.getIn(['player', 'angle']);
+        if (ship.children[0]) {
+            ship.children[0].rotation.y = state.getIn(['player', 'direction']) * Math.PI / 2;
+        }
+        ship.rotation.z = state.getIn(['player', 'angle']) + Math.PI / 2;
         const position = polarToCartesian(state.getIn(['player', 'angle']), state.getIn(['player', 'radius']));
         ship.position.x = position.x;
         ship.position.y = position.y;
