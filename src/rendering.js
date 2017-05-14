@@ -1,7 +1,23 @@
 import * as THREE from 'three';
+import './MTLLoader';
+import './OBJLoader';
 import { polarToCartesian } from './helpers';
 
 const $score = document.getElementById('score');
+
+function loadAsset(name) {
+    return new Promise((resolve, reject) => {
+        const mtlLoader = new THREE.MTLLoader();
+        mtlLoader.setPath('assets/');
+        mtlLoader.load(`${name}.mtl`, (materials) => {
+            materials.preload();
+            const objLoader = new THREE.OBJLoader();
+            objLoader.setMaterials(materials);
+            objLoader.setPath('assets/');
+            objLoader.load(`${name}.obj`, object => resolve(object), undefined, xhr => reject(xhr));
+        }, undefined, xhr => reject(xhr));
+    });
+}
 
 function circleFactory() {
     const segmentCount = 64;
@@ -20,20 +36,18 @@ function circleFactory() {
 }
 
 function shipFactory() {
-    const cylinder = new THREE.Mesh(
-        new THREE.CylinderGeometry(0, 0.75, 2, 4),
-        new THREE.MeshPhongMaterial({
-            color: 0x156289,
-            emissive: 0x072534,
-            shading: THREE.FlatShading,
-        }),
-    );
-    cylinder.rotation.y = Math.PI / 2;
-    cylinder.scale.multiplyScalar(3);
-
     const container = new THREE.Object3D();
-    container.add(cylinder);
-
+    loadAsset('ship').then((ship) => {
+        ship.traverse((node) => {
+            if (node.material) {
+                // eslint-disable-next-line no-param-reassign
+                node.material.side = THREE.DoubleSide;
+            }
+        });
+        ship.scale.multiplyScalar(3);
+        ship.rotation.set(Math.PI / 2, Math.PI * 2, 0);
+        container.add(ship);
+    });
     return container;
 }
 
@@ -135,8 +149,8 @@ function setup() {
             }
         }
 
-        ship.scale.y = state.getIn(['player', 'direction']); // TODO
-        ship.rotation.z = state.getIn(['player', 'angle']) + (Math.PI * 2);
+        ship.scale.y = state.getIn(['player', 'direction']);
+        ship.rotation.z = state.getIn(['player', 'angle']);
         const position = polarToCartesian(state.getIn(['player', 'angle']), state.getIn(['player', 'radius']));
         ship.position.x = position.x;
         ship.position.y = position.y;
