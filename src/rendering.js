@@ -152,10 +152,7 @@ function setup() {
             }
         }
 
-        if (ship.children[0]) {
-            ship.children[0].rotation.y = state.getIn(['player', 'direction']) * Math.PI / 2;
-        }
-        ship.rotation.z = state.getIn(['player', 'angle']) + Math.PI / 2;
+        ship.rotation.z = state.getIn(['player', 'angle']) - (state.getIn(['player', 'direction']) > 0 ? 0 : Math.PI);
         const position = polarToCartesian(state.getIn(['player', 'angle']), state.getIn(['player', 'radius']));
         ship.position.x = position.x;
         ship.position.y = position.y;
