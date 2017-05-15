@@ -25,28 +25,32 @@ function coinFactory() {
     return coins;
 }
 
-function cannonballFactory() {
+function cannonballFactory(last) {
+    let angle;
+    do {
+        angle = Math.random() * Math.PI * 2;
+    } while (angle > last - Math.PI / 2 && angle < last + Math.PI / 2);
     return {
-        angle: Math.random() * Math.PI * 2,
+        angle,
         radius: 0,
         size: 1,
         collision: false,
     };
 }
 
-function getPlayerSpeed(stage) {
+function calculatePlayerSpeed(stage) {
     const BASE = 1.35;
     const ACCELERATION = 0.05;
     return (BASE + stage * ACCELERATION) / 1000;
 }
 
-function getCannonSpeed(stage) {
+function calculateCannonSpeed(stage) {
     const BASE = 750;
     const ACCELERATION = 7.5;
     return BASE / (1 + stage / ACCELERATION);
 }
 
-function getCannonballSpeed(stage) {
+function calculateCannonballSpeed(stage) {
     const BASE = 35;
     const ACCELERATION = 0.5;
     return (BASE + stage * ACCELERATION) / 1000;
@@ -61,9 +65,9 @@ function gameFactory(stage = 1, score = 0) {
             size: 6,
         },
         speed: {
-            player: getPlayerSpeed(stage),
-            cannon: getCannonSpeed(stage),
-            cannonball: getCannonballSpeed(stage),
+            player: calculatePlayerSpeed(stage),
+            cannon: calculateCannonSpeed(stage),
+            cannonball: calculateCannonballSpeed(stage),
         },
         coins: coinFactory(),
         cannonballs: [],
@@ -138,7 +142,7 @@ function gameFactory(stage = 1, score = 0) {
 
             return cannonballs.map((cannonball) => {
                 const cannonballAngle = cannonball.get('angle');
-                const cannonballSpeed = clock.get('delta') * getCannonballSpeed(stage);
+                const cannonballSpeed = clock.get('delta') * calculateCannonballSpeed(stage);
                 const cannonBallSize = cannonball.get('size');
 
                 const collision = detectCollision(
@@ -167,8 +171,9 @@ function gameFactory(stage = 1, score = 0) {
             if (state.get('shipDestroyed')) {
                 return state;
             }
-            return state.update('cannonballs', cannonballs =>
-            cannonballs.push(Immutable.fromJS(cannonballFactory())));
+            const angle = state.get('cannonballs').size ? state.get('cannonballs').last().get('angle') : 0;
+            const cannonball = Immutable.fromJS(cannonballFactory(angle));
+            return state.update('cannonballs', cannonballs => cannonballs.push(cannonball));
         });
 
     const finish = events.map(() => (state) => {
