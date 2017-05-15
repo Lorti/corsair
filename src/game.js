@@ -7,8 +7,6 @@ import { polarToCartesian, detectCollision } from './helpers';
 
 const COINS = 32;
 const RADIUS = 50;
-const SPEED = 1.25;
-const ACCELERATION = 0.1;
 
 function coinFactory() {
     const coins = [];
@@ -36,6 +34,24 @@ function cannonballFactory() {
     };
 }
 
+function getPlayerSpeed(stage) {
+    const BASE = 1.35;
+    const ACCELERATION = 0.05;
+    return (BASE + stage * ACCELERATION) / 1000;
+}
+
+function getCannonSpeed(stage) {
+    const BASE = 750;
+    const ACCELERATION = 7.5;
+    return BASE / (1 + stage / ACCELERATION);
+}
+
+function getCannonballSpeed(stage) {
+    const BASE = 35;
+    const ACCELERATION = 0.5;
+    return (BASE + stage * ACCELERATION) / 1000;
+}
+
 function gameFactory(stage = 1, score = 0) {
     const initialState = Immutable.fromJS({
         player: {
@@ -44,7 +60,11 @@ function gameFactory(stage = 1, score = 0) {
             direction: -1,
             size: 6,
         },
-        speed: (SPEED + (stage - 1) * ACCELERATION) / 1000,
+        speed: {
+            player: getPlayerSpeed(stage),
+            cannon: getCannonSpeed(stage),
+            cannonball: getCannonballSpeed(stage),
+        },
         coins: coinFactory(),
         cannonballs: [],
         score,
@@ -63,7 +83,7 @@ function gameFactory(stage = 1, score = 0) {
         }
 
         const position = state.getIn(['player', 'angle']) +
-            clock.get('delta') * input.get('direction') * state.get('speed');
+            clock.get('delta') * input.get('direction') * state.getIn(['speed', 'player']);
         const normalized = (position + Math.PI * 2) % (Math.PI * 2);
 
         return state.mergeDeep({
@@ -79,7 +99,7 @@ function gameFactory(stage = 1, score = 0) {
         return state
             .update('coins', (coins) => {
                 const playerAngle = state.getIn(['player', 'angle']);
-                const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
+                const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.getIn(['speed', 'player']);
                 const playerSize = state.getIn(['player', 'size']) * Math.PI / 180;
 
                 return coins.map((coin) => {
@@ -113,12 +133,12 @@ function gameFactory(stage = 1, score = 0) {
             const playerAngle = state.getIn(['player', 'angle']);
             const playerRadius = state.getIn(['player', 'radius']);
             const playerDirection = state.getIn(['player', 'direction']);
-            const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.get('speed');
+            const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.getIn(['speed', 'cannonball']);
             const playerSize = state.getIn(['player', 'size']);
 
             return cannonballs.map((cannonball) => {
                 const cannonballAngle = cannonball.get('angle');
-                const cannonballSpeed = clock.get('delta') * state.get('speed') * 50;
+                const cannonballSpeed = clock.get('delta') * getCannonballSpeed(stage);
                 const cannonBallSize = cannonball.get('size');
 
                 const collision = detectCollision(
@@ -142,7 +162,7 @@ function gameFactory(stage = 1, score = 0) {
         }));
 
     const cannon = events
-        .throttleTime(Math.round(1 / initialState.get('speed')))
+        .throttleTime(initialState.getIn(['speed', 'cannon']))
         .map(() => (state) => {
             if (state.get('shipDestroyed')) {
                 return state;
