@@ -141,13 +141,15 @@ function gameFactory(stage = 1, score = 0) {
             });
         }));
 
-    const cannon = events.throttleTime(1000).map(() => (state) => {
-        if (state.get('shipDestroyed')) {
-            return state;
-        }
-        return state.update('cannonballs', cannonballs =>
+    const cannon = events
+        .throttleTime(Math.round(1 / initialState.get('speed')))
+        .map(() => (state) => {
+            if (state.get('shipDestroyed')) {
+                return state;
+            }
+            return state.update('cannonballs', cannonballs =>
             cannonballs.push(Immutable.fromJS(cannonballFactory())));
-    });
+        });
 
     const finish = events.map(() => (state) => {
         const lootCollected = state.get('coins').every(coin => coin.get('collected'));
