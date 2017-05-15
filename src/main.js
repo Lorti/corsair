@@ -140,9 +140,9 @@ const score = events.map(() => (state) => {
 
 const state = Rx.Observable
     .merge(player, cannon, coins, cannonballs, score)
-    .scan((state, reducer) => reducer(state), initialState)
+    .startWith(initialState)
+    .scan((state, reducer) => reducer(state))
     .takeWhile(state => !state.get('finish'));
 
 const update = renderer();
-update(initialState);
-state.subscribe(state => update(state));
+clock.withLatestFrom(state).subscribe(([, state]) => update(state));
