@@ -149,6 +149,9 @@ function setup() {
                 cannonballs.add(cannonballFactory());
             }
         }
+        for (let i = 0; i < cannonballs.children.length; i++) {
+            cannonballs.children[i].visible = false;
+        }
         for (let i = 0; i < state.get('cannonballs').size; i++) {
             const cannonball = cannonballs.children[i];
             if (!cannonball) {
@@ -160,6 +163,7 @@ function setup() {
                 );
                 cannonball.position.x = position.x;
                 cannonball.position.y = position.y;
+                cannonball.visible = true;
             }
         }
 
