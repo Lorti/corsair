@@ -103,7 +103,7 @@ const cannonballs = events.map(([clock]) => state =>
         return cannonballs.map((cannonball) => {
             const cannonballAngle = cannonball.get('angle');
             const cannonballSpeed = clock.get('delta') * state.get('speed') * 50;
-            const cannonballRadius = cannonball.get('size');
+            const cannonBallSize = cannonball.get('size');
 
             const collision = detectCollision(
                 polarToCartesian(playerAngle, playerRadius),
@@ -111,7 +111,7 @@ const cannonballs = events.map(([clock]) => state =>
                 playerSize,
                 polarToCartesian(cannonballAngle, cannonball.get('radius')),
                 polarToCartesian(cannonballAngle, 1).setLength(cannonballSpeed),
-                cannonballRadius,
+                cannonBallSize,
                 4,
             );
 

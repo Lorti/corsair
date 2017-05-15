@@ -19,6 +19,16 @@ function loadAsset(name) {
     });
 }
 
+function wireframeSphereFactory(size) {
+    const geometry = new THREE.SphereBufferGeometry(size, size, size);
+    const wireframe = new THREE.WireframeGeometry(geometry);
+    const line = new THREE.LineSegments(wireframe);
+    line.material.depthTest = false;
+    line.material.opacity = 0.25;
+    line.material.transparent = true;
+    return line;
+}
+
 function circleFactory() {
     const segmentCount = 64;
     const radius = 50;
@@ -37,6 +47,7 @@ function circleFactory() {
 
 function shipFactory() {
     const container = new THREE.Object3D();
+    container.add(wireframeSphereFactory(6));
     loadAsset('ship').then((ship) => {
         ship.traverse((node) => {
             if (node.material) {
@@ -44,7 +55,7 @@ function shipFactory() {
                 node.material.side = THREE.DoubleSide;
             }
         });
-        ship.scale.multiplyScalar(9);
+        ship.scale.multiplyScalar(12);
         ship.rotation.set(Math.PI / 2, Math.PI, 0);
         container.add(ship);
     });
