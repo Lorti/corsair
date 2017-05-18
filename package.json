@@ -1,7 +1,7 @@
 {
-  "name": "web-push-notifications",
-  "version": "0.1.0",
-  "description": "Web Push Notifications",
+  "name": "corsair",
+  "version": "1.0.0",
+  "description": "Corsair",
   "author": {
     "name": "Manuel Wieser",
     "url": "http://manu.ninja/"
@@ -11,7 +11,7 @@
     "babel-loader": "^7.0.0",
     "babel-preset-es2015": "^6.24.1",
     "eslint": "^3.19.0",
-    "eslint-config-airbnb-base": "^11.1.3",
+    "eslint-config-airbnb-base": "^11.2.0",
     "eslint-import-resolver-webpack": "^0.8.1",
     "eslint-plugin-import": "^2.2.0",
     "webpack": "^2.5.0",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "immutable": "^3.8.1",
-    "rxjs": "^5.3.1",
+    "rxjs": "^5.4.0",
     "three": "^0.85.2"
   }
 }

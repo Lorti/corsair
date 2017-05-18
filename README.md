@@ -2,7 +2,7 @@
 
 * RxJS
 * Immutable.js
-* three.js
+* WebGL (three.js)
 * https://telegram.org/blog/games
 
 ---
