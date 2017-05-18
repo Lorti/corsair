@@ -74,6 +74,7 @@ function gameFactory(stage = 1, score = 0) {
         score,
         lootCollected: false,
         shipDestroyed: false,
+        lingering: 60,
     });
 
     const clock = clockStream();
@@ -82,7 +83,7 @@ function gameFactory(stage = 1, score = 0) {
     const events = clock.withLatestFrom(input);
 
     const player = events.map(([clock, input]) => (state) => {
-        if (state.get('shipDestroyed')) {
+        if (state.get('lootCollected') || state.get('shipDestroyed')) {
             return state;
         }
 
@@ -168,7 +169,7 @@ function gameFactory(stage = 1, score = 0) {
     const cannon = events
         .throttleTime(initialState.getIn(['speed', 'cannon']))
         .map(() => (state) => {
-            if (state.get('shipDestroyed')) {
+            if (state.get('lootCollected') || state.get('shipDestroyed')) {
                 return state;
             }
             const angle = state.get('cannonballs').size ? state.get('cannonballs').last().get('angle') : 0;
@@ -179,7 +180,13 @@ function gameFactory(stage = 1, score = 0) {
     const finish = events.map(() => (state) => {
         const lootCollected = state.get('coins').every(coin => coin.get('collected'));
         const shipDestroyed = state.get('cannonballs').find(cannonball => cannonball.get('collision'));
-        return state.set('lootCollected', lootCollected).set('shipDestroyed', shipDestroyed);
+        if (lootCollected || shipDestroyed) {
+            return state
+                .set('lootCollected', lootCollected)
+                .set('shipDestroyed', shipDestroyed)
+                .update('lingering', lingering => lingering - 1);
+        }
+        return state;
     });
 
     const state = Rx.Observable
@@ -188,7 +195,8 @@ function gameFactory(stage = 1, score = 0) {
         .scan((state, reducer) => reducer(state));
 
     return clock
-        .withLatestFrom(state);
+        .withLatestFrom(state)
+        .takeWhile(([, state]) => state.get('lingering') >= 0);
 }
 
 export default gameFactory;

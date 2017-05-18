@@ -3,15 +3,20 @@ import renderer from './rendering';
 
 const render = renderer();
 (function start(stage, score) {
-    const loop = game(stage, score).subscribe(([, state]) => {
-        render(state);
-        if (state.get('lootCollected')) {
-            loop.unsubscribe();
-            start(stage + 1, state.get('score'));
-        }
-        if (state.get('shipDestroyed')) {
-            loop.unsubscribe();
-            // TODO
-        }
+    const round = { stage, score };
+    game(...round).subscribe({
+        next: ([, state]) => {
+            render(state);
+            if (state.get('lootCollected')) {
+                round.stage = stage + 1;
+                round.score = state.get('score');
+                // TODO
+            }
+            if (state.get('shipDestroyed')) {
+                // TODO
+            }
+        },
+        error: error => console.error(error),
+        complete: () => start(...round),
     });
 }(1, 0));
