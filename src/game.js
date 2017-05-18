@@ -56,7 +56,7 @@ function calculateCannonballSpeed(stage) {
     return (BASE + stage * ACCELERATION) / 1000;
 }
 
-function gameFactory(stage = 1, score = 0) {
+function gameFactory(stage, score) {
     const initialState = Immutable.fromJS({
         player: {
             angle: Math.PI * 0.5,
