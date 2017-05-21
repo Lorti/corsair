@@ -51,8 +51,8 @@ function shipFactory() {
     loadAsset('ship').then((ship) => {
         ship.traverse((node) => {
             if (node.material) {
-                // eslint-disable-next-line no-param-reassign
-                node.material.side = THREE.DoubleSide;
+                node.castShadow = true; // eslint-disable-line no-param-reassign
+                node.material.side = THREE.DoubleSide; // eslint-disable-line no-param-reassign
             }
         });
         ship.scale.multiplyScalar(12);
@@ -62,29 +62,54 @@ function shipFactory() {
     return container;
 }
 
+function islandFactory() {
+    const container = new THREE.Object3D();
+    loadAsset('island').then((island) => {
+        island.scale.multiplyScalar(32);
+        island.rotation.set(Math.PI / 2, 0, 0);
+        island.position.set(0, 0, -8.5);
+        island.traverse((node) => {
+            node.castShadow = true; // eslint-disable-line no-param-reassign
+        });
+        container.add(island);
+    });
+    return container;
+}
+
+function waterFactory() {
+    const geometry = new THREE.PlaneBufferGeometry(500, 500);
+    const material = new THREE.ShadowMaterial({ opacity: 0.25 });
+    const plane = new THREE.Mesh(geometry, material);
+    plane.receiveShadow = true;
+    return plane;
+}
+
 function coinFactory() {
     const cylinder = new THREE.Mesh(
         new THREE.CylinderGeometry(2, 2, 0.5, 16),
         new THREE.MeshPhongMaterial({
-            color: 0x156289,
-            emissive: 0x072534,
+            color: 0xffd800,
+            shininess: 32,
+            specular: 0xffff82,
             shading: THREE.FlatShading,
         }),
     );
     cylinder.rotation.x = Math.PI / 2;
-
     return cylinder;
 }
 
 function cannonballFactory() {
-    return new THREE.Mesh(
+    const cannonball = new THREE.Mesh(
         new THREE.SphereGeometry(2, 32, 32),
         new THREE.MeshPhongMaterial({
-            color: 0x156289,
-            emissive: 0x072534,
+            color: 0x23232d,
+            shininess: 64,
+            specular: 0x646478,
             shading: THREE.FlatShading,
         }),
     );
+    cannonball.castShadow = true;
+    return cannonball;
 }
 
 function setup() {
@@ -92,13 +117,19 @@ function setup() {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 50, 150);
     camera.position.z = 100;
 
-    const axisHelper = new THREE.AxisHelper(10);
-    scene.add(axisHelper);
+//    const axisHelper = new THREE.AxisHelper(10);
+//    scene.add(axisHelper);
+
+//    camera.position.set(0, -100, 0);
+//    camera.up = new THREE.Vector3(0, 1, 0);
+//    camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x333333, 1);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
 
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
@@ -114,13 +145,30 @@ function setup() {
     dirLight.castShadow = true;
     scene.add(dirLight);
 
-    const circle = circleFactory();
+    dirLight.shadow.mapSize.width = 512;
+    dirLight.shadow.mapSize.height = 512;
+    dirLight.shadow.camera.left = -50;
+    dirLight.shadow.camera.right = 50;
+    dirLight.shadow.camera.top = 50;
+    dirLight.shadow.camera.bottom = -50;
+    dirLight.shadow.camera.near = 50;
+    dirLight.shadow.camera.far = 150;
+
+//    const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
+//    scene.add(cameraHelper);
+
+//    const circle = circleFactory();
+//    scene.add(circle);
+
     const ship = shipFactory();
+    const water = waterFactory();
+    const island = islandFactory();
     const coins = new THREE.Object3D();
     const cannonballs = new THREE.Object3D();
 
-    scene.add(circle);
     scene.add(ship);
+    scene.add(water);
+    scene.add(island);
     scene.add(coins);
     scene.add(cannonballs);
 
