@@ -53,7 +53,6 @@ function shipFactory() {
             node.castShadow = true; // eslint-disable-line no-param-reassign
             if (node.material) {
                 node.material.side = THREE.DoubleSide; // eslint-disable-line no-param-reassign
-                node.material.shading = THREE.FlatShading; // eslint-disable-line no-param-reassign
             }
         });
         ship.scale.multiplyScalar(12);
@@ -70,10 +69,7 @@ function islandFactory() {
         island.rotation.set(Math.PI / 2, 0, 0);
         island.position.set(0, 0, -8.5);
         island.traverse((node) => {
-            if (node.material) {
-                node.castShadow = true; // eslint-disable-line no-param-reassign
-                node.material.shading = THREE.FlatShading; // eslint-disable-line no-param-reassign
-            }
+            node.castShadow = true; // eslint-disable-line no-param-reassign
         });
         container.add(island);
     });
@@ -95,25 +91,24 @@ function coinFactory() {
             color: 0xffd800,
             shininess: 32,
             specular: 0xffff82,
-            shading: THREE.FlatShading,
         }),
     );
     cylinder.rotation.x = Math.PI / 2;
+    cylinder.castShadow = true;
     return cylinder;
 }
 
 function cannonballFactory() {
-    const cannonball = new THREE.Mesh(
+    const sphere = new THREE.Mesh(
         new THREE.SphereGeometry(2, 32, 32),
         new THREE.MeshPhongMaterial({
             color: 0x23232d,
             shininess: 64,
             specular: 0x646478,
-            shading: THREE.FlatShading,
         }),
     );
-    cannonball.castShadow = true;
-    return cannonball;
+    sphere.castShadow = true;
+    return sphere;
 }
 
 function setup() {
@@ -128,40 +123,43 @@ function setup() {
 //    camera.up = new THREE.Vector3(0, 1, 0);
 //    camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x333333, 1);
     renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
-    hemiLight.color.setHSL(0.6, 1, 0.95);
-    hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-    hemiLight.position.set(0, 0, 500);
-    scene.add(hemiLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+    ambientLight.color.setHSL(0.1, 1, 0.95);
+    scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.color.setHSL(0.1, 1, 0.95);
-    dirLight.position.set(-1, 1, 1);
-    dirLight.position.multiplyScalar(50);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
+    hemisphereLight.color.setHSL(0.6, 1, 0.95);
+    hemisphereLight.groundColor.setHSL(0.095, 1, 0.75);
+    hemisphereLight.position.set(0, 0, 500);
+    scene.add(hemisphereLight);
 
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
-    dirLight.shadow.camera.left = -50;
-    dirLight.shadow.camera.right = 50;
-    dirLight.shadow.camera.top = 50;
-    dirLight.shadow.camera.bottom = -50;
-    dirLight.shadow.camera.near = 1;
-    dirLight.shadow.camera.far = 200;
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.65);
+    directionalLight.color.setHSL(0.1, 1, 0.95);
+    directionalLight.position.set(-1, 1, 1);
+    directionalLight.position.multiplyScalar(50);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+
+    directionalLight.shadow.mapSize.width = 1024;
+    directionalLight.shadow.mapSize.height = 1024;
+    directionalLight.shadow.camera.left = -50;
+    directionalLight.shadow.camera.right = 50;
+    directionalLight.shadow.camera.top = 50;
+    directionalLight.shadow.camera.bottom = -50;
+    directionalLight.shadow.camera.near = 1;
+    directionalLight.shadow.camera.far = 200;
 
 //    const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
 //    scene.add(cameraHelper);
 
-//    const circle = circleFactory();
-//    scene.add(circle);
+    const circle = circleFactory();
+    scene.add(circle);
 
     const ship = shipFactory();
     const water = waterFactory();
