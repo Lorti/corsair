@@ -1,0 +1,37 @@
+body {
+    font-family: 'Pirata One', sans-serif;
+    background: radial-gradient(circle,
+    hsl(180, 15%, 90%) 10%,
+    hsl(180, 25%, 70%) 20%,
+    hsl(180, 35%, 40%) 100%);
+}
+
+canvas {
+    display: block;
+}
+
+#title,
+#score {
+    position: absolute;
+    top: 1rem;
+    color: #fff;
+}
+
+#title {
+    left: 1rem;
+    font-size: 1.5rem;
+}
+
+#score {
+    right: 1rem;
+    font-size: 3rem;
+}
+
+h1,
+p {
+    margin: 0;
+}
+
+a {
+    color: #000;
+}
