@@ -5,7 +5,7 @@ const render = renderer();
 (function start(stage, score) {
     const progress = { stage, score };
     game(stage, score).subscribe({
-        next: ([, state]) => {
+        next: (state) => {
             render(state);
             if (state.get('lootCollected')) {
                 progress.stage = stage + 1;

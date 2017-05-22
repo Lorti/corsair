@@ -101,70 +101,69 @@ function gameFactory(stage, score) {
 
     const coins = events.map(([clock]) => (state) => {
         let collected = 0;
+
+        const playerAngle = state.getIn(['player', 'angle']);
+        const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.getIn(['speed', 'player']);
+        const playerSize = state.getIn(['player', 'size']) * Math.PI / 180;
+
+        function updateCoin(coin) {
+            if (coin.get('collected')) {
+                return coin;
+            }
+
+            const coinAngle = coin.get('angle');
+            const coinSpeed = 0;
+            const coinSize = coin.get('size') * Math.PI / 180;
+
+            const collision = detectCollision(
+                new Vector2(playerAngle, 0), new Vector2(playerSpeed, 0), playerSize,
+                new Vector2(coinAngle, 0), new Vector2(coinSpeed, 0), coinSize,
+                4);
+
+            if (collision) {
+                collected++;
+            }
+
+            return coin.set('collected', collision);
+        }
+
         return state
-            .update('coins', (coins) => {
-                const playerAngle = state.getIn(['player', 'angle']);
-                const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.getIn(['speed', 'player']);
-                const playerSize = state.getIn(['player', 'size']) * Math.PI / 180;
-
-                return coins.map((coin) => {
-                    if (coin.get('collected')) {
-                        return coin;
-                    }
-
-                    const coinAngle = coin.get('angle');
-                    const coinSpeed = 0;
-                    const coinSize = coin.get('size') * Math.PI / 180;
-
-                    const collision = detectCollision(
-                        new Vector2(playerAngle, 0), new Vector2(playerSpeed, 0), playerSize,
-                        new Vector2(coinAngle, 0), new Vector2(coinSpeed, 0), coinSize,
-                        4,
-                    );
-
-                    if (collision) {
-                        collected++;
-                        return coin.set('collected', true);
-                    }
-
-                    return coin;
-                });
-            })
+            .update('coins', coins => coins.map(updateCoin))
             .update('score', score => score + collected);
     });
 
-    const cannonballs = events.map(([clock]) => state =>
-        state.update('cannonballs', (cannonballs) => {
-            const playerAngle = state.getIn(['player', 'angle']);
-            const playerRadius = state.getIn(['player', 'radius']);
-            const playerDirection = state.getIn(['player', 'direction']);
-            const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.getIn(['speed', 'cannonball']);
-            const playerSize = state.getIn(['player', 'size']);
+    const cannonballs = events.map(([clock]) => (state) => {
+        const playerAngle = state.getIn(['player', 'angle']);
+        const playerRadius = state.getIn(['player', 'radius']);
+        const playerDirection = playerAngle + (Math.PI / 2) * state.getIn(['player', 'direction']);
+        const playerSpeed = clock.get('delta') * state.getIn(['player', 'direction']) * state.getIn(['speed', 'cannonball']);
+        const playerSize = state.getIn(['player', 'size']);
 
-            return cannonballs.map((cannonball) => {
-                const cannonballAngle = cannonball.get('angle');
-                const cannonballSpeed = clock.get('delta') * calculateCannonballSpeed(stage);
-                const cannonBallSize = cannonball.get('size');
+        function updateCannonball(cannonball) {
+            const cannonballAngle = cannonball.get('angle');
+            const cannonBallRadius = cannonball.get('radius');
+            const cannonballSpeed = clock.get('delta') * calculateCannonballSpeed(stage);
+            const cannonBallSize = cannonball.get('size');
 
-                const collision = detectCollision(
-                    polarToCartesian(playerAngle, playerRadius),
-                    polarToCartesian(playerAngle + (Math.PI / 2) * playerDirection, playerSpeed),
-                    playerSize,
-                    polarToCartesian(cannonballAngle, cannonball.get('radius')),
-                    polarToCartesian(cannonballAngle, 1).setLength(cannonballSpeed),
-                    cannonBallSize,
-                    4,
-                );
+            let next = cannonball;
+            const collision = detectCollision(
+                polarToCartesian(playerAngle, playerRadius),
+                polarToCartesian(playerDirection, playerSpeed),
+                playerSize,
+                polarToCartesian(cannonballAngle, cannonBallRadius),
+                polarToCartesian(cannonballAngle, cannonballSpeed),
+                cannonBallSize,
+                4);
 
-                const next = cannonball.update('radius', radius => radius + cannonballSpeed);
+            if (collision) {
+                next = next.set('collision', true);
+            }
 
-                if (collision) {
-                    return next.set('collision', true);
-                }
+            return next.set('radius', cannonBallRadius + cannonballSpeed);
+        }
 
-                return next;
-            });
-        }));
+        return state.update('cannonballs', cannonballs => cannonballs.map(updateCannonball));
+    });
 
     const cannon = events
         .throttleTime(initialState.getIn(['speed', 'cannon']))
@@ -195,8 +194,8 @@ function gameFactory(stage, score) {
         .scan((state, reducer) => reducer(state));
 
     return clock
-        .withLatestFrom(state)
-        .takeWhile(([, state]) => state.get('lingering') >= 0);
+        .withLatestFrom(state, (clock, state) => state)
+        .takeWhile(state => state.get('lingering') >= 0);
 }
 
 export default gameFactory;

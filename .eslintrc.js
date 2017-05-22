@@ -2,7 +2,7 @@ module.exports = {
     'extends': 'airbnb-base',
     'rules': {
         'indent': ['error', 4],
-        'max-len': ['warn', 120],
+        'max-len': 'off',
         'no-mixed-operators': 'off',
         'no-plusplus': 'off',
         'no-shadow': 'off',

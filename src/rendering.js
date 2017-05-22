@@ -3,6 +3,7 @@ import './MTLLoader';
 import './OBJLoader';
 import { polarToCartesian } from './helpers';
 
+const RADIUS = 50;
 const $score = document.getElementById('score');
 
 function loadAsset(name) {
@@ -31,7 +32,7 @@ function wireframeSphereFactory(size) {
 
 function circleFactory() {
     const segmentCount = 64;
-    const radius = 50;
+    const radius = RADIUS;
     const geometry = new THREE.Geometry();
     const material = new THREE.LineBasicMaterial({ color: 0xFFFFFF, opacity: 0.1, transparent: true });
 
