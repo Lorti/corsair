@@ -39,9 +39,11 @@ Mittwoch, 7. Juni 2017
 1. Improvements
     * Speed (~~Observables~~)
     * Difficulty Tweaks
+    * High Scores
     * Animations / Explosions
     * Coin Model
     * Water Shader
+    * Sound
 
 ## karriere.at
 
