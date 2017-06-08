@@ -10,7 +10,7 @@ export default () => {
         .fromEvent(document, 'keypress')
         .scan((previous, event) => {
             if (event.keyCode === 32) {
-                return previous.set('direction', previous.get('direction') * (-1));
+                return previous.update('direction', direction => direction * -1);
             }
             return previous;
         }, state)

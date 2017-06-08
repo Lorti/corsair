@@ -48,7 +48,7 @@ function circleFactory() {
 
 function shipFactory() {
     const container = new THREE.Object3D();
-//    container.add(wireframeSphereFactory(6));
+    // container.add(wireframeSphereFactory(6));
     loadAsset('ship').then((ship) => {
         ship.traverse((node) => {
             node.castShadow = true; // eslint-disable-line no-param-reassign
@@ -117,12 +117,12 @@ function setup() {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 200);
     camera.position.z = 100;
 
-//    const axisHelper = new THREE.AxisHelper(10);
-//    scene.add(axisHelper);
+    // const axisHelper = new THREE.AxisHelper(10);
+    // scene.add(axisHelper);
 
-//    camera.position.set(0, -100, 0);
-//    camera.up = new THREE.Vector3(0, 1, 0);
-//    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    // camera.position.set(0, -100, 30);
+    // camera.up = new THREE.Vector3(0, 1, 0);
+    // camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
