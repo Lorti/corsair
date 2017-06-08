@@ -5,6 +5,8 @@
 * WebGL (three.js)
 * https://telegram.org/blog/games
 
+![](/screenshot.jpg?raw=true)
+
 ## To-do
 
 Want to help? Please open up a pull request for your improvment, or maybe even an issue beforehand if you're starting on something.
