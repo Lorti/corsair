@@ -11,7 +11,7 @@ export default () => {
         .interval(0, Rx.Scheduler.animationFrame)
         .scan((previous) => {
             const time = performance.now();
-            return state.merge({
+            return previous.merge({
                 time,
                 delta: time - previous.get('time'),
             });
