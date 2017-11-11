@@ -178,7 +178,7 @@ function gameFactory(stage, score) {
 
     const finish = events.map(() => (state) => {
         const lootCollected = state.get('coins').every(coin => coin.get('collected'));
-        const shipDestroyed = !lootCollected && state.get('cannonballs').find(cannonball => cannonball.get('collision'));
+        const shipDestroyed = !lootCollected && state.get('cannonballs').some(cannonball => cannonball.get('collision'));
         if (lootCollected || shipDestroyed) {
             return state
                 .set('lootCollected', lootCollected)
@@ -189,7 +189,7 @@ function gameFactory(stage, score) {
     });
 
     const state = Rx.Observable
-        .merge(player, cannon, coins, cannonballs, finish)
+        .merge(player, coins, cannon, cannonballs, finish)
         .startWith(initialState)
         .scan((state, reducer) => reducer(state));
 
