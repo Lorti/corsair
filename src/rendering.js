@@ -156,7 +156,7 @@ function setup() {
     directionalLight.shadow.camera.near = 1;
     directionalLight.shadow.camera.far = 200;
 
-//    const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
+//    const cameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
 //    scene.add(cameraHelper);
 
     const circle = circleFactory();
